@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.database import Base, engine
 from app.routers.users import router as user_router
+from sqlalchemy import text
 
 
 
@@ -19,6 +20,9 @@ def root():
 
 @app.get("/health")
 def health():
-    return {
-        "status": "healthy"
-    }
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"status": "database connected"}
+    except Exception as e:
+        return {"status": "database error", "detail": str(e)}
